@@ -32,7 +32,8 @@ open class DTPhotoViewerController: UIViewController {
     /// Indicates if status bar should be hidden after photo viewer controller is presented.
     /// Default value is true
     open var shouldHideStatusBarOnPresent = true
-    
+
+#if !os(tvOS)
     /// Indicates status bar style when photo viewer controller is being presenting
     /// Default value if UIStatusBarStyle.default
     open var statusBarStyleOnPresenting: UIStatusBarStyle = UIStatusBarStyle.default
@@ -45,7 +46,7 @@ open class DTPhotoViewerController: UIViewController {
     /// Include when pan gesture recognizer is active.
     /// Default value if UIStatusBarStyle.LightContent
     open var statusBarStyleOnDismissing: UIStatusBarStyle = UIStatusBarStyle.lightContent
-    
+#endif
     /// Background color of the viewer.
     /// Default value is black.
     open var backgroundColor: UIColor = UIColor.black {
@@ -127,8 +128,9 @@ open class DTPhotoViewerController: UIViewController {
         collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: flowLayout)
         collectionView.register(DTPhotoCollectionViewCell.self, forCellWithReuseIdentifier: kPhotoCollectionViewCellIdentifier)
         collectionView.backgroundColor = UIColor.clear
+#if !os(tvOS)
         collectionView.isPagingEnabled = true
-        
+#endif
         backgroundView = UIView(frame: CGRect.zero)
         
         // Image view
@@ -142,10 +144,12 @@ open class DTPhotoViewerController: UIViewController {
         imageView.image = image
         self.referencedView = referencedView
         collectionView.dataSource = self
-        
+
+#if !os(tvOS)
         modalPresentationStyle = UIModalPresentationStyle.overFullScreen
         modalPresentationCapturesStatusBarAppearance = true
-        
+#endif
+
         if #available(iOS 11.0, *) {
             collectionView.contentInsetAdjustmentBehavior = .never
         } else {
@@ -199,17 +203,22 @@ open class DTPhotoViewerController: UIViewController {
         //Tap gesture recognizer
         singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(_handleTapGesture))
         singleTapGestureRecognizer.numberOfTapsRequired = 1
+#if !os(tvOS)
         singleTapGestureRecognizer.numberOfTouchesRequired = 1
-        
+#endif
         //Pan gesture recognizer
         panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(_handlePanGesture))
+#if !os(tvOS)
         panGestureRecognizer.maximumNumberOfTouches = 1
+#endif
         view.isUserInteractionEnabled = true
         
         //Double tap gesture recognizer
         doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(_handleDoubleTapGesture))
         doubleTapGestureRecognizer.numberOfTapsRequired = 2
+#if !os(tvOS)
         doubleTapGestureRecognizer.numberOfTouchesRequired = 1
+#endif
         singleTapGestureRecognizer.require(toFail: doubleTapGestureRecognizer)
         
         scrollView.addGestureRecognizer(doubleTapGestureRecognizer)
@@ -265,7 +274,7 @@ open class DTPhotoViewerController: UIViewController {
             dismissalAnimationWillStart()
         }
     }
-    
+#if !os(tvOS)
     open override var prefersStatusBarHidden : Bool {
         if shouldHideStatusBarOnPresent {
             return _shouldHideStatusBar
@@ -283,7 +292,8 @@ open class DTPhotoViewerController: UIViewController {
         }
         return statusBarStyleOnDismissing
     }
-    
+#endif
+
     //MARK: Private methods
     fileprivate func startAnimation() {
         //Hide reference image view
@@ -523,7 +533,7 @@ open class DTPhotoViewerController: UIViewController {
     private func updateStatusBar(isHidden: Bool, defaultStatusBarStyle isDefaultStyle: Bool) {
         _shouldUseStatusBarStyle = isDefaultStyle
         _shouldHideStatusBar = isHidden
-#if !os(visionOS)
+#if !os(visionOS) && !os(tvOS)
         setNeedsStatusBarAppearanceUpdate()
 #endif
     }
